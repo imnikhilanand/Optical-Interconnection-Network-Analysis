@@ -4,8 +4,8 @@ This project is based on the analysis of Optical Interconnection Network. Here w
 <br>
 Processor Utilization VS Channel Utilization
 <br>
-<img src="PU vs CU" width="60%">
+<img src="PU vs CU.png" width="60%">
 <br>
 Average Waiting Time VS Channel Utilization
 <br>
-<img src="AWT vs CU" width="60%">
+<img src="AWT vs CU.png" width="60%">
