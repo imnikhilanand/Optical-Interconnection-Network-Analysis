@@ -8,7 +8,7 @@ Created on Tue Jun 26 08:24:36 2018
 #importing libraries
 import numpy as np
 import pandas as pd
-import matplotlib as plt  
+import matplotlib.pyplot as plt  
 
 
 #importing datasets
@@ -28,7 +28,6 @@ for i in range(0,640):
 dataset.drop('Processor_Utilization ',axis = 1, inplace = True)
 dataset['Processor_Utilization'] = c
 
-
 #channel waiting time
 a = dataset.iloc[0:,5]  
 b = a.str.split(",")
@@ -47,7 +46,6 @@ for i in range(0,640):
 dataset.drop('Input_Waiting_Time',axis = 1, inplace = True)
 dataset['Input_Waiting_Time'] = c
 
-
 #Network_Response_Time
 a = dataset.iloc[0:,5]  
 b = a.str.split(",")
@@ -57,7 +55,6 @@ for i in range(0,640):
 dataset.drop('Network_Response_Time',axis = 1, inplace = True)
 dataset['Network_Response_Time'] = c
 
-
 #Channel_Utilization
 a = dataset.iloc[0:,5]  
 b = a.str.split(",")
@@ -66,7 +63,6 @@ for i in range(0,640):
     c.append((int(b.iloc[0:][i][1])+int(b.iloc[0:][i][0]))/2)
 dataset.drop('Channel_Utilization',axis = 1, inplace = True)
 dataset['Channel_Utilization'] = c
-
 
 #T/R
 a = dataset.iloc[0:,4]  
@@ -80,22 +76,17 @@ for i in range(0,640):
 dataset.drop('T/R',axis = 1, inplace = True)
 dataset['T/R'] = c
 
-
 #splitting data set into x and y
 X = dataset.iloc[0:,0:8]
 X['T/R'] = dataset.iloc[0:,9]
 X = X.values
 y = dataset.iloc[0:,8].values
 
-
-
 # Taking care of missing data
 from sklearn.preprocessing import Imputer
 imputer = Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0)
 imputer = imputer.fit(X[:, 4:10])
 X[:, 4:10] = imputer.transform(X[:, 4:10])
-
-
 
 #encoding categorical data 
 k = []
@@ -155,13 +146,42 @@ sc_X = StandardScaler()
 X_train = sc_X.fit_transform(X_train)
 X_test = sc_X.transform(X_test)
 
-#svr 
+# Fitting Multiple Linear Regression to the Training set
 from sklearn.linear_model import LinearRegression
 regressor = LinearRegression()
-regressor.fit(X_train,y_train)
+regressor.fit(X_train, y_train)
+y_pred = regressor.predict(X_test)
 
-#predicting results
-y_pred = regressor.predict(X_test)    
+
+#SVR
+from sklearn.svm import SVR
+regressor = SVR(kernel = 'rbf')
+regressor.fit(X, y)
+y_pred = regressor.predict(6.5)
+y_pred = sc_y.inverse_transform(y_pred)
 
     
+#Decision Tree Regression
+from sklearn.tree import DecisionTreeRegressor
+regressor = DecisionTreeRegressor(random_state = 0)
+regressor.fit(X, y)
+y_pred = regressor.predict(6.5)
+
+#Drawing various Plots
+plt.scatter(X_test[:,4],y_test,color='red')
+plt.scatter(X_test[:,4],y_pred)
+plt.show()
+
+import seaborn as sns; sns.set(color_codes=True)
+tips = sns.load_dataset("tips")
+ax = sns.regplot(X_test[:,9],y_test,color='g',label='Expected',data=tips)
+ax = sns.regplot(X_test[:,9],y_pred,color='r',label='Experimental',data=tips)
+ax.set(xlabel='Processor Utilization', ylabel='Channel Utilization')
+ax.legend()
+
+tips = sns.load_dataset("tips")
+ax = sns.regplot(X_test[:,10],y_test,color='c',label='Expected',data=tips)
+ax = sns.regplot(X_test[:,10],y_pred,color='b',label='Experimental',data=tips)
+ax.set(xlabel='Average Waiting Time', ylabel='Channel Utilization')
+ax.legend()
 
